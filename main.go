@@ -50,8 +50,11 @@ func getWindow(funcName string) uintptr {
 func ticker() error {
 	t := time.NewTicker(1 * time.Second)
 
+	date := time.Now()
+	fileName := "./" + date.Format("20060102") + "_gawl.log"
+
 	// ログファイルの出力設定
-	logfile, err := os.OpenFile("./windowlogger.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+	logfile, err := os.OpenFile(fileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 	if err != nil {
 		panic("cannot open:" + err.Error())
 	}
@@ -78,6 +81,7 @@ func ticker() error {
 }
 
 func main() {
+
 	if err := ticker(); err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %s\n", err)
 	}
