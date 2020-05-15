@@ -11,6 +11,8 @@ import (
 	"unsafe"
 )
 
+const LOG_FORMAT = "20060102"
+
 var (
 	mod                     = windows.NewLazyDLL("user32.dll")
 	procGetWindowText       = mod.NewProc("GetWindowTextW")
@@ -51,7 +53,7 @@ func ticker() error {
 	t := time.NewTicker(1 * time.Second)
 
 	date := time.Now()
-	fileName := "./" + date.Format("20060102") + "_gawl.log"
+	fileName := "./" + date.Format(LOG_FORMAT) + "_gawl.log"
 
 	// ログファイルの出力設定
 	logfile, err := os.OpenFile(fileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
@@ -72,6 +74,18 @@ func ticker() error {
 				text := GetWindowText(HWND(hwnd))
 				if prevText != text {
 					//fmt.Println("v:", v, "window :", text, "# hwnd:", hwnd)
+					tmp := "./" + time.Now().Format(LOG_FORMAT) + "_gawl.log"
+					if fileName != tmp {
+						// 日付が変わったら新しいログに書き込む
+						logfile.Close()
+						fileName = tmp
+						logfile, err = os.OpenFile(fileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+						if err != nil {
+							panic("cannot open:" + err.Error())
+						}
+						log.SetOutput(io.MultiWriter(logfile, os.Stdout))
+						log.SetFlags(log.Ldate | log.Ltime)
+					}
 					log.Println(",", text)
 					prevText = text
 				}
