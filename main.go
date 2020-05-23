@@ -111,17 +111,17 @@ func ticker() error {
 		case <-t.C:
 			idleTime := getIdleTime()
 			if idleTime < IdleWaitingTime {
-				counter = 1
 
 				if hwnd := getWindow("GetForegroundWindow"); hwnd != 0 {
 					text := GetWindowText(HWND(hwnd))
-					if prevText != text {
+					if prevText != text || counter > 1 {
 						//fmt.Println("v:", v, "window :", text, "# hwnd:", hwnd)
 						openLogfile(&fileName, logfile)
 						log.Println(",", text)
 						prevText = text
 					}
 				}
+				counter = 1
 			} else {
 				if idleTime > (IdleWaitingTime * counter) {
 					openLogfile(&fileName, logfile)
